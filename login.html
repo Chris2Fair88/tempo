@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tempo — Login</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="site-header__brand" href="./">
+          <span class="site-header__logo" aria-hidden="true">♫</span>
+          <span class="site-header__name">Tempo</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="auth">
+      <div class="container auth__inner">
+        <form id="loginForm" class="card auth__card" autocomplete="on">
+          <h1 class="auth__title">Welcome back</h1>
+          <p class="auth__subtitle">Sign in to your account</p>
+
+          <label class="field">
+            <span class="field__label">Email</span>
+            <input class="field__input" type="email" name="email" required placeholder="you@example.com" />
+          </label>
+
+          <label class="field">
+            <span class="field__label">Password</span>
+            <input class="field__input" type="password" name="password" required placeholder="••••••••" />
+          </label>
+
+          <label class="field">
+            <span class="field__label">Role</span>
+            <select class="field__input" name="role" required>
+              <option value="student">Student/Parent</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+
+          <button class="button button--primary auth__submit" type="submit">Sign in</button>
+          <p class="auth__hint">Demo only — selects role and redirects.</p>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // Minimal demo auth: store role and redirect
+      const form = document.getElementById('loginForm');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const role = data.get('role');
+        localStorage.setItem('tempo-role', role);
+        const routes = {
+          student: 'student.html',
+          teacher: 'teacher.html',
+          admin: 'admin.html',
+        };
+        window.location.href = routes[role] || 'index.html';
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tempo — Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="site-header__brand" href="./">
+          <span class="site-header__logo" aria-hidden="true">♫</span>
+          <span class="site-header__name">Tempo</span>
+        </a>
+      </div>
+    </header>
+    <main class="dash">
+      <div class="container">
+        <h1 class="section-title">Admin Dashboard</h1>
+        <div class="grid">
+          <section class="card">
+            <h2>At a Glance</h2>
+            <div class="stack">
+              <div><strong>Teachers:</strong> 5</div>
+              <div><strong>Students:</strong> 28</div>
+              <div><strong>Lessons this week:</strong> 42</div>
+            </div>
+          </section>
+          <section class="card">
+            <h2>Recent Bookings</h2>
+            <ul class="list">
+              <li class="list__item">Jamie booked Piano with Priya — Thu 6:00p</li>
+              <li class="list__item">Alex booked Guitar with Sam — Mon 4:00p</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Guard by role (demo)
+      const role = localStorage.getItem('tempo-role');
+      if (role !== 'admin') window.location.replace('login.html');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tempo — Student</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="site-header__brand" href="./">
+          <span class="site-header__logo" aria-hidden="true">♫</span>
+          <span class="site-header__name">Tempo</span>
+        </a>
+      </div>
+    </header>
+    <main class="dash">
+      <div class="container">
+        <h1 class="section-title">Student Dashboard</h1>
+        <div class="grid">
+          <section class="card">
+            <h2>Upcoming Lessons</h2>
+            <ul class="list" id="studentLessons"></ul>
+          </section>
+          <section class="card">
+            <h2>Your Profile</h2>
+            <div class="stack">
+              <div><strong>Name:</strong> Demo Student</div>
+              <div><strong>Instrument:</strong> Piano</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Guard by role (demo)
+      const role = localStorage.getItem('tempo-role');
+      if (role !== 'student') window.location.replace('login.html');
+      // Demo data
+      const list = document.getElementById('studentLessons');
+      list.innerHTML = `
+        <li class="list__item">Tue 5:30p — Piano with Jamie</li>
+        <li class="list__item">Thu 6:00p — Piano with Priya</li>
+      `;
+    </script>
+  </body>
+</html>

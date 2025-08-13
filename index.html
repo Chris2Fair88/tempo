@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tempo — Keeping Things on Time</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="theme theme--dark-violet">
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="site-header__brand" href="/">
+          <span class="site-header__logo" aria-hidden="true">♫</span>
+          <span class="site-header__name">Tempo</span>
+        </a>
+        <nav class="site-header__nav" aria-label="Main">
+          <a class="site-header__link" href="#features">Features</a>
+          <a class="site-header__link" href="#how-it-works">How it works</a>
+          <a class="site-header__link" href="#contact">Contact</a>
+          <a class="site-header__link" href="./login.html">Login</a>
+        </nav>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <a class="button button--primary site-header__cta" href="#cta">Schedule a Lesson</a>
+          <button id="themeToggle" class="button theme-toggle theme-toggle--icon" type="button" aria-pressed="false">
+            <span class="sr-only">Toggle dark mode</span>
+            <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero__inner">
+          <div class="hero__content">
+            <h1 class="hero__title">Simple scheduling for in‑home music lessons</h1>
+            <p class="hero__subtitle">
+              Book lessons, manage availability, and keep everyone in sync — without the hassle.
+            </p>
+            <div class="hero__actions" id="cta">
+              <a class="button button--primary" href="#">Get Started</a>
+              <a class="button button--ghost" href="#features">See Features</a>
+            </div>
+          </div>
+          <div class="hero__visual" role="img" aria-label="Weekly schedule preview">
+            <div class="mock-calendar">
+              <div class="mock-calendar__header">Your Week</div>
+              <ul class="mock-calendar__list">
+                <li class="mock-calendar__item">
+                  <span class="mock-calendar__time">Mon 4:00p</span>
+                  <span class="mock-calendar__title">Guitar — Alex</span>
+                </li>
+                <li class="mock-calendar__item">
+                  <span class="mock-calendar__time">Tue 5:30p</span>
+                  <span class="mock-calendar__title">Piano — Jamie</span>
+                </li>
+                <li class="mock-calendar__item">
+                  <span class="mock-calendar__time">Thu 6:00p</span>
+                  <span class="mock-calendar__title">Violin — Priya</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="container">
+          <h2 class="section-title">Why Tempo</h2>
+          <ul class="features__list">
+            <li class="feature-card">
+              <h3 class="feature-card__title">Fast Booking</h3>
+              <p class="feature-card__text">Parents pick a time that fits your availability in seconds.</p>
+            </li>
+            <li class="feature-card">
+              <h3 class="feature-card__title">Smart Availability</h3>
+              <p class="feature-card__text">Weekly blocks, buffers, and conflict‑aware schedules.</p>
+            </li>
+            <li class="feature-card">
+              <h3 class="feature-card__title">Calendar Friendly</h3>
+              <p class="feature-card__text">ICS export today; Google sync coming later.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="how">
+        <div class="container">
+          <h2 class="section-title">How it works</h2>
+          <ol class="how__steps">
+            <li class="how__step"><strong>Set availability</strong> for each teacher.</li>
+            <li class="how__step"><strong>Share your link</strong> with parents/students.</li>
+            <li class="how__step"><strong>Confirm bookings</strong> and get reminders.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+  <footer id="contact" class="site-footer">
+      <div class="container site-footer__inner">
+        <p class="site-footer__brand">Tempo</p>
+        <p class="site-footer__meta">© <span id="year"></span> Tempo. All rights reserved.</p>
+      </div>
+      <script>
+        // Footer year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Theme init: preferred from storage or system
+        const root = document.documentElement;
+        const STORAGE_KEY = 'tempo-theme';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function applyTheme(theme) {
+          if (theme === 'dark') {
+            root.setAttribute('data-theme', 'dark');
+            toggleBtn.setAttribute('aria-pressed', 'true');
+            icon.textContent = '🌞';
+          } else {
+            root.removeAttribute('data-theme');
+            toggleBtn.setAttribute('aria-pressed', 'false');
+            icon.textContent = '🌙';
+          }
+        }
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const initial = saved || (prefersDark.matches ? 'dark' : 'light');
+        const toggleBtn = document.getElementById('themeToggle');
+  const icon = toggleBtn.querySelector('.theme-toggle__icon');
+        applyTheme(initial);
+
+        toggleBtn.addEventListener('click', () => {
+          // Add a temporary class for smooth transitions
+          if (!root.classList.contains('theme-animate')) {
+            root.classList.add('theme-animate');
+            setTimeout(() => root.classList.remove('theme-animate'), 550);
+          }
+          const isDark = root.getAttribute('data-theme') === 'dark';
+          const next = isDark ? 'light' : 'dark';
+          applyTheme(next);
+          localStorage.setItem(STORAGE_KEY, next);
+        });
+
+        // React to system preference changes when user hasn't chosen
+        prefersDark.addEventListener('change', e => {
+          const savedNow = localStorage.getItem(STORAGE_KEY);
+          if (!savedNow) applyTheme(e.matches ? 'dark' : 'light');
+        });
+      </script>
+    </footer>
+  </body>
+</html>
