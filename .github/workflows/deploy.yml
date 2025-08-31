@@ -1,0 +1,56 @@
+name: Deploy tempo-react to GitHub Pages
+
+on:
+  push:
+    branches: [ "main", "stage-1-frontend-and-api" ]
+    paths:
+      - 'tempo-react/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tempo-react/package-lock.json
+
+      - name: Install deps
+        working-directory: tempo-react
+        run: npm ci
+
+      - name: Build
+        working-directory: tempo-react
+        run: npm run build
+        env:
+          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
+          VITE_GOOGLE_CALENDAR_ID: "primary"
+          VITE_GOOGLE_CALENDAR_API_BASE: "https://www.googleapis.com/calendar/v3"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tempo-react/dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
