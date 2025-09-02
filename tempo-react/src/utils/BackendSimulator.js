@@ -1,5 +1,3 @@
-import { toast } from '../lib/notify'
-
 // Simulate user database
 let users = [
   { id: 1, username: 'admin', password: 'admin123', role: 'admin', email: 'admin@tempo.com' },

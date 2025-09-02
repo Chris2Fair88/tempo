@@ -5,8 +5,10 @@ import { setAuth, DASHBOARD_ROUTE_BY_ROLE } from '../lib/auth';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import { simulateRegister } from '../utils/BackendSimulator';
+import { ApiDataList, useApiData } from '../components/ApiDataManager';
+import { getAllCalendarEvents, searchCalendarEvents } from '../utils/ThirdPartyApi';
 
-export default function Home({ calendarEvents = [], apiStatus = {} }) {
+export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData }) {
     const navigate = useNavigate();
     const [search] = useSearchParams();
     const showRegister = (search.get('register') === '1');
@@ -87,95 +89,126 @@ export default function Home({ calendarEvents = [], apiStatus = {} }) {
         }
     };
 
-    // Simple calendar view for upcoming events and holidays
-    const renderSimpleCalendar = () => {
+    /**
+     * Render consolidated upcoming events section
+     * Combines API data with local events in a single, logical interface
+     */
+    const renderUpcomingEvents = () => {
         const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
         
-        // Filter holidays from calendar events and convert to event format
-        const holidayEvents = calendarEvents
-            .filter(event => event.type === 'holiday')
-            .map(holiday => ({
-                id: holiday.id,
-                name: holiday.title,
-                description: 'School will be closed',
-                date: holiday.date,
-                type: 'holiday'
-            }));
+        // Combine all event sources
+        const allEvents = [
+            ...mockEvents,
+            ...calendarEvents.map(event => {
+                // Clean up API descriptions - remove all technical text for holidays
+                let cleanDescription = event.description;
+                
+                // For holidays, always use user-friendly description
+                if (event.isHoliday) {
+                    cleanDescription = 'School may be closed';
+                } else if (cleanDescription && (
+                    cleanDescription.includes('Observance') ||
+                    cleanDescription.includes('Google Calendar Settings') ||
+                    cleanDescription.includes('hide observances') ||
+                    cleanDescription === 'Public holiday'
+                )) {
+                    cleanDescription = 'Music event';
+                }
+                
+                return {
+                    id: event.id,
+                    name: event.title,
+                    description: cleanDescription || (event.isHoliday ? 'School may be closed' : 'Music event'),
+                    date: event.date,
+                    type: event.isHoliday ? 'holiday' : 'music-event',
+                    source: event.source
+                };
+            })
+        ];
 
-        // Filter music events from calendar events
-        const musicEvents = calendarEvents
-            .filter(event => event.type === 'event')
-            .map(musicEvent => ({
-                id: musicEvent.id,
-                name: musicEvent.title,
-                description: musicEvent.description || 'Music event',
-                date: musicEvent.date,
-                type: 'music-event'
-            }));
-
-        // Combine with existing mock events
-        const allEvents = [...mockEvents, ...holidayEvents, ...musicEvents];
+        // Filter and sort upcoming events
         const upcomingEvents = allEvents
             .filter(event => {
-                // Handle different date formats
-                let eventDate;
-                if (typeof event.date === 'string' && event.date.includes(',')) {
-                    // Handle formatted dates like "Sunday, August 31, 2025"
-                    eventDate = new Date(event.date);
-                } else {
-                    eventDate = new Date(event.date);
-                }
+                const eventDate = new Date(event.date);
                 return eventDate >= currentDate;
             })
-            .slice(0, 6) // Show more events since we have more data now
-            .sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateA - dateB;
-            });
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 6);
 
-        if (upcomingEvents.length === 0) {
-            return (
-                <div className="simple-calendar-empty">
-                    <p>No upcoming events at this time.</p>
-                    {apiStatus.calendar === 'loading' && <p>Loading calendar data...</p>}
+        const renderEventItem = (event) => (
+            <div key={event.id} className={`upcoming-event ${event.type}`}>
+                <div className="event-date-info">
+                    <div className="date">
+                        {new Date(event.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        })}
+                    </div>
+                    <div className="day">
+                        {new Date(event.date).toLocaleDateString('en-US', { 
+                            weekday: 'short' 
+                        })}
+                    </div>
                 </div>
-            );
-        }
-
-        return (
-            <div className="simple-calendar">
-                <h3>Upcoming Important Dates!</h3>
-                <div className="upcoming-events">
-                    {upcomingEvents.map(event => (
-                        <div key={event.id} className={`upcoming-event ${event.type}`}>
-                            <div className="event-date-info">
-                                <div className="date">
-                                    {new Date(event.date).toLocaleDateString('en-US', { 
-                                        month: 'short', 
-                                        day: 'numeric' 
-                                    })}
-                                </div>
-                                <div className="day">
-                                    {new Date(event.date).toLocaleDateString('en-US', { 
-                                        weekday: 'short' 
-                                    })}
-                                </div>
-                            </div>
-                            <div className="event-details">
-                                <div className="event-name">{event.name}</div>
-                                {event.description && (
-                                    <div className="event-description">{event.description}</div>
-                                )}
-                            </div>
-                            <div className={`event-type-badge ${event.type}`}>
-                                {event.type === 'music-event' ? 'music' : event.type}
-                            </div>
-                        </div>
-                    ))}
+                <div className="event-details">
+                    <div className="event-name">{event.name}</div>
+                    {event.description && (
+                        <div className="event-description">{event.description}</div>
+                    )}
+                </div>
+                <div className="event-badges">
+                    <div className={`event-type-badge ${event.type}`}>
+                        {event.type === 'music-event' ? 'music' : 
+                         event.type === 'holiday' ? 'holiday' : event.type}
+                    </div>
                 </div>
             </div>
+        );
+
+        return (
+            <section className="upcoming-events-section">
+                <div className="container">
+                    <h2 className="section-title">Upcoming Important Dates</h2>
+                    <p className="section-description">
+                        Events and holidays that may affect lesson scheduling
+                    </p>
+
+                    {apiStatus.calendar === 'loading' && (
+                        <div className="events-loading">
+                            <div className="preloader">
+                                <div className="preloader__spinner"></div>
+                                <p>Loading upcoming events...</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {apiStatus.calendar === 'error' && (
+                        <div className="events-error">
+                            <div className="error-message">
+                                <p>Unable to load some events. Showing available information.</p>
+                                {onReloadData && (
+                                    <button 
+                                        className="button button--secondary"
+                                        onClick={onReloadData}
+                                    >
+                                        Try Again
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {upcomingEvents.length === 0 && apiStatus.calendar !== 'loading' ? (
+                        <div className="events-empty">
+                            <p>No upcoming events at this time.</p>
+                        </div>
+                    ) : (
+                        <div className="upcoming-events">
+                            {upcomingEvents.map(renderEventItem)}
+                        </div>
+                    )}
+                </div>
+            </section>
         );
     };
 
@@ -216,10 +249,10 @@ export default function Home({ calendarEvents = [], apiStatus = {} }) {
                 </section>
             </div>
 
-            {/* Simple Calendar for Teacher Unavailability */}
+            {/* Upcoming Events Section */}
             <section className="calendar-section">
                 <div className="container">
-                    {renderSimpleCalendar()}
+                    {renderUpcomingEvents()}
                 </div>
             </section>
 

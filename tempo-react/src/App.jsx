@@ -1,8 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-import './styles/index.css'
-
 // Components
 import Header from './components/Header'
 import Toasts from './components/Toasts'
@@ -14,33 +12,55 @@ import Admin from './pages/Admin'
 import Teacher from './pages/Teacher'
 import Student from './pages/Student'
 
-// API imports - Single Google Calendar API (includes holidays)
-import { getCalendarEvents } from './utils/GoogleCalendarApi'
+// API imports - Refactored third-party API integration
+import { getAllCalendarEvents } from './utils/ThirdPartyApi'
 
 function AppContent() {
   const location = useLocation()
   const isAdminPage = location.pathname === '/admin'
   
-  // API State - Single API for all calendar data
+  // API State - Improved state management for third-party API
   const [calendarEvents, setCalendarEvents] = useState([])
-  const [apiStatus, setApiStatus] = useState({
-    calendar: 'loading'
+  const [apiLoadingState, setApiLoadingState] = useState({
+    calendar: 'loading',
+    error: null
   })
 
-  // Load API data on mount
+  // Load API data on mount - Following criteria requirements
   useEffect(() => {
-    loadCalendarEvents()
+    loadAllCalendarData()
   }, [])
 
-  const loadCalendarEvents = async () => {
+  /**
+   * Load calendar events from third-party API
+   * Following criteria: error handling, preloader states, user messages
+   */
+  const loadAllCalendarData = async () => {
     try {
-      setApiStatus(prev => ({ ...prev, calendar: 'loading' }))
-      const eventData = await getCalendarEvents()
-      setCalendarEvents(eventData)
-      setApiStatus(prev => ({ ...prev, calendar: 'success' }))
+      setApiLoadingState(prev => ({ 
+        ...prev, 
+        calendar: 'loading',
+        error: null
+      }))
+      
+      const eventData = await getAllCalendarEvents()
+      setCalendarEvents(eventData || [])
+      
+      setApiLoadingState(prev => ({ 
+        ...prev, 
+        calendar: eventData && eventData.length > 0 ? 'success' : 'empty'
+      }))
+      
     } catch (error) {
       console.error('Failed to load calendar events:', error)
-      setApiStatus(prev => ({ ...prev, calendar: 'demo' }))
+      setApiLoadingState(prev => ({ 
+        ...prev, 
+        calendar: 'error',
+        error: error.message || 'Failed to load calendar data'
+      }))
+      
+      // Fallback to demo data on error
+      setCalendarEvents([])
     }
   }
 
@@ -57,7 +77,8 @@ function AppContent() {
             element={
               <Home 
                 calendarEvents={calendarEvents}
-                apiStatus={apiStatus}
+                apiStatus={apiLoadingState}
+                onReloadData={loadAllCalendarData}
               />
             } 
           />
@@ -67,20 +88,23 @@ function AppContent() {
             element={
               <Admin 
                 calendarEvents={calendarEvents}
-                apiStatus={apiStatus}
+                apiStatus={apiLoadingState}
+                onReloadData={loadAllCalendarData}
               />
             } 
           />
           <Route path="/teacher" element={
             <Teacher 
               calendarEvents={calendarEvents}
-              apiStatus={apiStatus}
+              apiStatus={apiLoadingState}
+              onReloadData={loadAllCalendarData}
             />
           } />
           <Route path="/student" element={
             <Student 
               calendarEvents={calendarEvents}
-              apiStatus={apiStatus}
+              apiStatus={apiLoadingState}
+              onReloadData={loadAllCalendarData}
             />
           } />
         </Routes>
