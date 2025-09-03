@@ -1,186 +1,213 @@
-import { useEffect, useMemo, useState } from 'react';
-import { getUserId } from '../lib/auth';
+import { useMemo } from 'react';
 import { store } from '../lib/store';
 
-export default function Teacher({ calendarEvents = [], apiStatus = {} }) {
-  const teacherId = getUserId() || 1; // fallback to demo teacher
-  const [week, setWeek] = useState([]);
-  const [availability, setAvailability] = useState({});
-  const stats = useMemo(() => store.getTeacherStats(teacherId), [teacherId]);
-  const notes = useMemo(() => {
-    const t = store.getState().teachers.find(t => t.id === teacherId);
-    return (t && t.studentNotes) ? t.studentNotes : {};
-  }, [teacherId]);
+/**
+ * Teacher Dashboard
+ * 
+ * Provides access to teacher-specific features including student management,
+ * lesson planning, and schedule oversight.
+ */
 
-  useEffect(() => {
-    setWeek(store.getTeacherWeek(teacherId));
-    // Load existing availability settings
-    const savedAvailability = localStorage.getItem(`teacher-${teacherId}-availability`);
-    if (savedAvailability) {
-      setAvailability(JSON.parse(savedAvailability));
-    }
-  }, [teacherId]);
-
-  useEffect(() => {
-    setWeek(store.getTeacherWeek(teacherId));
-    // Load existing availability settings
-    const savedAvailability = localStorage.getItem(`teacher-${teacherId}-availability`);
-    if (savedAvailability) {
-      setAvailability(JSON.parse(savedAvailability));
-    }
-  }, [teacherId]);
-
-  function saveNote(studentId, e) {
-    store.setTeacherNote(teacherId, studentId, e.target.value);
-  }
-
-  // Generate next 14 days for availability calendar
-  const generateAvailabilityDays = () => {
-    const days = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 14; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dateString = date.toISOString().split('T')[0];
-      
-      // Check if it's a holiday (teacher unavailable)
-      const isHoliday = calendarEvents.some(event => 
-        event.type === 'holiday' && event.date === dateString
-      );
-      
-      days.push({
-        date: dateString,
-        displayDate: date.toLocaleDateString(),
-        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        isHoliday,
-        isAvailable: availability[dateString] === true,
-        isUnavailable: availability[dateString] === false
-      });
-    }
-    
-    return days;
-  };
-
-  const toggleAvailability = (dateString, isAvailable) => {
-    const newAvailability = {
-      ...availability,
-      [dateString]: isAvailable
-    };
-    setAvailability(newAvailability);
-    localStorage.setItem(`teacher-${teacherId}-availability`, JSON.stringify(newAvailability));
-  };
-
-  const renderCalendarItem = (event) => (
-    <div className="api-data-card">
-      <h3>{event.title}</h3>
-      <p><strong>Date:</strong> {event.date}</p>
-      <p><strong>Type:</strong> {event.type === 'holiday' ? '�️ Holiday' : '📅 Event'}</p>
-      {event.description && <p>{event.description}</p>}
-      {event.location && <p><strong>Location:</strong> {event.location}</p>}
-      <div className="api-source">
-        <span className={`source-badge ${event.source}`}>
-          {event.source === 'demo-data' ? '🎭 Demo' : '🌐 Live API'}
-        </span>
-      </div>
-    </div>
+export default function Teacher() {
+  const s = store.getState();
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Get students assigned to this teacher
+  const myStudents = useMemo(() => 
+    s.students.filter(student => student.teacherId === currentUser.id),
+    [s.students, currentUser.id]
   );
 
+  // Get recent payments for my students
+  const myStudentPayments = useMemo(() => {
+    const myStudentIds = myStudents.map(s => s.id);
+    return store.listPayments().filter(payment => 
+      myStudentIds.includes(payment.studentId)
+    );
+  }, [myStudents]);
+
+  const totalRevenue = myStudentPayments.reduce((sum, p) => sum + p.amount, 0);
+
   return (
-    <section className="dash">
-      <h1 className="section-title">Teacher Dashboard</h1>
-
-      <div className="grid">
-        <section className="card">
-          <h2>📋 Week Agenda</h2>
-          <ul className="list">
-            {week.map(item => (
-              <li key={item.id} className="list__item">
-                {item.day} {item.time} — {item.studentName} {item.status === 'absent' && <em>(absent)</em>}
-                <div className="mt-6">
-                  <label className="form__field">
-                    <span className="form__label">Notes</span>
-                    <textarea
-                      className="form__input"
-                      rows={2}
-                      defaultValue={notes[item.studentId] || ''}
-                      onBlur={(e)=>saveNote(item.studentId, e)}
-                      placeholder="Lesson plan / practice notes"
-                    />
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="card">
-          <h2>📊 Stats</h2>
-          <p><strong>Students this week:</strong> {stats.studentsThisWeek}</p>
-          <p><strong>Paid this month:</strong> ${stats.paidThisMonth}</p>
-        </section>
+    <div className="dashboard">
+      <div className="dashboard__header">
+        <h1 className="dashboard__title">Teacher Dashboard</h1>
+        <p className="dashboard__subtitle">
+          Manage your students and track their progress
+        </p>
       </div>
 
-      {/* Teacher Availability Calendar - Full Width */}
-      <section className="card full-width">
-        <h2>📅 Set Your Availability</h2>
-        <p className="help">Mark your availability for the next 14 days. Students will see these when booking lessons.</p>
-        
-        <div className="availability-calendar-extended">
-          {generateAvailabilityDays().map(day => (
-            <div 
-              key={day.date} 
-              className={`availability-day ${day.isHoliday ? 'holiday' : ''} ${day.isAvailable ? 'available' : ''} ${day.isUnavailable ? 'unavailable' : ''}`}
-            >
-              <div className="day-header">
-                <span className="day-name">{day.dayName}</span>
-                <span className="day-date">{day.displayDate}</span>
-              </div>
-              
-              {day.isHoliday ? (
-                <div className="holiday-notice">🎉 Public Holiday</div>
-              ) : (
-                <div className="availability-controls">
-                  <button 
-                    className={`btn-availability available ${day.isAvailable ? 'active' : ''}`}
-                    onClick={() => toggleAvailability(day.date, true)}
-                  >
-                    ✅ Available
-                  </button>
-                  <button 
-                    className={`btn-availability unavailable ${day.isUnavailable ? 'active' : ''}`}
-                    onClick={() => toggleAvailability(day.date, false)}
-                  >
-                    ❌ Unavailable
-                  </button>
+      <div className="dashboard__content">
+        <div className="dashboard__grid">
+          {/* Overview Stats */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">📊 My Overview</h2>
+            </div>
+            <div className="card__content">
+              <div className="stats-grid">
+                <div className="stat-item">
+                  <span className="stat-number">{myStudents.length}</span>
+                  <span className="stat-label">My Students</span>
                 </div>
+                <div className="stat-item">
+                  <span className="stat-number">{currentUser.instrument || 'Music'}</span>
+                  <span className="stat-label">Instrument</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">${totalRevenue}</span>
+                  <span className="stat-label">Student Revenue</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">{myStudentPayments.length}</span>
+                  <span className="stat-label">Recent Payments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">🎵 Quick Actions</h2>
+            </div>
+            <div className="card__content">
+              <div className="action-buttons">
+                <button className="button button--primary">
+                  📝 Create Lesson Plan
+                </button>
+                <button className="button button--secondary">
+                  📋 Grade Assignment
+                </button>
+                <button className="button button--secondary">
+                  📊 Progress Report
+                </button>
+                <button className="button button--secondary">
+                  📅 Schedule Lesson
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* My Students */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">👥 My Students</h2>
+            </div>
+            <div className="card__content">
+              {myStudents.length > 0 ? (
+                <ul className="list">
+                  {myStudents.map(student => (
+                    <li key={student.id} className="list__item">
+                      <strong>{student.name}</strong>
+                      <div className="student-details">
+                        <span className="student-level">Level: {student.level || 'Beginner'}</span>
+                        <span className="student-progress">Progress: {student.progress || 'Good'}</span>
+                      </div>
+                      <div className="contact-info">
+                        {student.email} • {student.phone}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="help">No students assigned to you yet</p>
               )}
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Upcoming Events - Full Width */}
-      <section className="card full-width">
-        <h2>📅 Upcoming Events</h2>
-        <p>Important dates affecting lesson scheduling</p>
-        
-        {calendarEvents.length > 0 ? (
-          <div>
-            <ul className="list">
-              {calendarEvents.slice(0, 8).map(event => (
-                <li key={event.id} className="list__item">
-                  <strong>{event.date}:</strong> {event.title}
-                  {event.type === 'holiday' && <span className="badge holiday">School Closed</span>}
-                  {event.location && <span className="event-location"> • {event.location}</span>}
-                </li>
-              ))}
-            </ul>
           </div>
-        ) : (
-          <p className="help">No upcoming events scheduled</p>
-        )}
-      </section>
-    </section>
+
+          {/* Recent Payments */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">💳 Student Payments</h2>
+            </div>
+            <div className="card__content">
+              {myStudentPayments.length > 0 ? (
+                <ul className="list">
+                  {myStudentPayments.slice(0, 5).map(payment => {
+                    const student = myStudents.find(s => s.id === payment.studentId);
+                    return (
+                      <li key={payment.id} className="list__item">
+                        <strong>{student?.name || `Student #${payment.studentId}`}</strong>
+                        <span className="payment-amount">${payment.amount}</span>
+                        <span className="payment-date">{payment.date}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="help">No recent payments from your students</p>
+              )}
+            </div>
+          </div>
+
+          {/* Schedule Overview */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">📅 This Week's Schedule</h2>
+            </div>
+            <div className="card__content">
+              <div className="schedule-grid">
+                <div className="schedule-day">
+                  <h4>Monday</h4>
+                  <div className="lesson-slot">
+                    <span className="lesson-time">2:00 PM</span>
+                    <span className="lesson-student">Harmony Mitchell</span>
+                  </div>
+                  <div className="lesson-slot">
+                    <span className="lesson-time">4:00 PM</span>
+                    <span className="lesson-student">Open Slot</span>
+                  </div>
+                </div>
+                <div className="schedule-day">
+                  <h4>Wednesday</h4>
+                  <div className="lesson-slot">
+                    <span className="lesson-time">3:00 PM</span>
+                    <span className="lesson-student">Available</span>
+                  </div>
+                </div>
+                <div className="schedule-day">
+                  <h4>Friday</h4>
+                  <div className="lesson-slot">
+                    <span className="lesson-time">1:00 PM</span>
+                    <span className="lesson-student">Group Practice</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Student Progress Tracking */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">📈 Progress Tracking</h2>
+            </div>
+            <div className="card__content">
+              {myStudents.length > 0 ? (
+                <div className="progress-list">
+                  {myStudents.map(student => (
+                    <div key={student.id} className="progress-item">
+                      <div className="progress-header">
+                        <strong>{student.name}</strong>
+                        <span className="progress-level">{student.level || 'Beginner'}</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{width: '75%'}}></div>
+                      </div>
+                      <div className="progress-notes">
+                        <span>Last lesson: Scales and arpeggios</span>
+                        <span>Next goal: Bach Invention No. 1</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="help">No student progress to track yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 
-export default function Toasts() {
+/**
+ * Toasts Component - Phase 3 Performance Optimized
+ * Memoized with optimized callbacks to prevent unnecessary re-renders
+ */
+const Toasts = memo(function Toasts() {
   const [items, setItems] = useState([]);
 
+  // Memoized callback to prevent useEffect re-creation
+  const onToast = useCallback((e) => {
+    const t = e.detail;
+    setItems(prev => [...prev, t]);
+    setTimeout(() => {
+      setItems(prev => prev.filter(i => i.id !== t.id));
+    }, t.duration || 2500);
+  }, []);
+
   useEffect(() => {
-    function onToast(e) {
-      const t = e.detail;
-      setItems(prev => [...prev, t]);
-      setTimeout(() => {
-        setItems(prev => prev.filter(i => i.id !== t.id));
-      }, t.duration || 2500);
-    }
     window.addEventListener('tempo:toast', onToast);
     return () => window.removeEventListener('tempo:toast', onToast);
-  }, []);
+  }, [onToast]);
 
   if (items.length === 0) return null;
 
@@ -26,4 +32,6 @@ export default function Toasts() {
       ))}
     </div>
   );
-}
+});
+
+export default Toasts;

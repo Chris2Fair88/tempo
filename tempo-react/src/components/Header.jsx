@@ -1,9 +1,15 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { clearRole, getRole } from '../lib/auth';
+import { clearAuth, getRole, getUserData } from '../lib/auth';
 import { useState, useEffect, useRef } from 'react';
 
-export default function Header() {
+/**
+ * Header Component - Phase 3 Performance Optimized
+ * Memoized to prevent unnecessary re-renders when parent state changes
+ */
+const Header = memo(function Header() {
   const role = getRole();
+  const userData = getUserData();
   const navigate = useNavigate();
   const [showContactInfo, setShowContactInfo] = useState(false);
   const dropdownRef = useRef(null);
@@ -26,7 +32,7 @@ export default function Header() {
   }, [showContactInfo]);
 
   function onLogout() {
-    clearRole();
+    clearAuth();
     navigate('/');
   }
 
@@ -80,10 +86,19 @@ export default function Header() {
             </div>
           )}
           {role && (
-            <button className="button-logout" onClick={onLogout}>Logout</button>
+            <div className="site-header__user">
+              {userData && (
+                <span className="site-header__username">
+                  {userData.name}
+                </span>
+              )}
+              <button className="button-logout" onClick={onLogout}>Logout</button>
+            </div>
           )}
         </div>
       </div>
     </header>
   );
-}
+});
+
+export default Header;

@@ -2,19 +2,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from '../lib/notify';
 import { setAuth, DASHBOARD_ROUTE_BY_ROLE } from '../lib/auth';
-import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import { simulateRegister } from '../utils/BackendSimulator';
-import { ApiDataList, useApiData } from '../components/ApiDataManager';
-import { getAllCalendarEvents, searchCalendarEvents } from '../utils/ThirdPartyApi';
+import { ApiDataList } from '../components/ApiDataManager';
 
 export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData }) {
     const navigate = useNavigate();
     const [search] = useSearchParams();
     const showRegister = (search.get('register') === '1');
 
-    // Modal states
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    // Modal states - removed login modal, now using navigation
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(showRegister);
 
     // Mock company events data
@@ -49,18 +46,15 @@ export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData
         }
     ];
 
-    const openLoginModal = () => {
-        setIsRegisterModalOpen(false);
-        setIsLoginModalOpen(true);
+    const navigateToLogin = () => {
+        navigate('/login');
     };
 
     const openRegisterModal = () => {
-        setIsLoginModalOpen(false);
         setIsRegisterModalOpen(true);
     };
 
     const closeModals = () => {
-        setIsLoginModalOpen(false);
         setIsRegisterModalOpen(false);
     };
 
@@ -71,17 +65,15 @@ export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData
             closeModals();
             
             // Set auth and navigate to appropriate dashboard
-            const userRole = userData.role;
-            const userId = result.user.id;
-            setAuth(userRole, userId);
+            setAuth(result.user);
             
             // Navigate to the corresponding profile page
-            const dashboardRoute = DASHBOARD_ROUTE_BY_ROLE[userRole];
+            const dashboardRoute = DASHBOARD_ROUTE_BY_ROLE[result.user.role];
             if (dashboardRoute) {
                 navigate(dashboardRoute);
             } else {
                 // Fallback to login if role not found
-                setTimeout(() => openLoginModal(), 1000);
+                setTimeout(() => navigateToLogin(), 1000);
             }
         } catch (error) {
             console.error('Registration failed:', error);
@@ -217,11 +209,11 @@ export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData
             {/* Hero Section */}
             <section className="hero">
                 <div className="container">
-                    <h1 className="section-title">Tempo</h1>
-                    <p>In-home music lessons, simplified.</p>
+                    <h1 className="hero__title">Tempo</h1>
+                    <p className="hero__description">In-home music lessons, simplified.</p>
                     
                     <div className="hero__actions">
-                        <button className="button-login" onClick={openLoginModal}>
+                        <button className="button-login" onClick={navigateToLogin}>
                             Login
                         </button>
                         <button className="button-register" onClick={openRegisterModal}>
@@ -257,16 +249,10 @@ export default function Home({ calendarEvents = [], apiStatus = {}, onReloadData
             </section>
 
             {/* Modals */}
-            <LoginModal 
-                isOpen={isLoginModalOpen}
-                onClose={closeModals}
-                onSwitchToRegister={openRegisterModal}
-            />
-            
             <RegisterModal 
                 isOpen={isRegisterModalOpen}
                 onClose={closeModals}
-                onSwitchToLogin={openLoginModal}
+                onSwitchToLogin={navigateToLogin}
                 onRegister={handleRegister}
             />
         </div>

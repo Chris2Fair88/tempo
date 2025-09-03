@@ -107,10 +107,10 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
       <div className="demo-credentials">
         <h4>Demo Credentials:</h4>
-        <ul>
-          <li><strong>Admin:</strong> admin / admin123</li>
-          <li><strong>Teacher:</strong> teacher / teacher123</li>
-          <li><strong>Student:</strong> student / student123</li>
+        <ul className="demo-credentials__list">
+          <li className="demo-credentials__item"><strong className="demo-credentials__label">Admin:</strong> admin / admin123</li>
+          <li className="demo-credentials__item"><strong className="demo-credentials__label">Teacher:</strong> teacher / teacher123</li>
+          <li className="demo-credentials__item"><strong className="demo-credentials__label">Student:</strong> student / student123</li>
         </ul>
       </div>
 

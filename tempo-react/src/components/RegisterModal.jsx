@@ -142,6 +142,7 @@ const RegisterModal = ({ isOpen, onClose, onRegister, onSwitchToLogin }) => {
           value={formData.username}
           onChange={handleInputChange}
           className="modal__input"
+          placeholder="Choose a username"
           required
         />
       </div>
@@ -155,6 +156,7 @@ const RegisterModal = ({ isOpen, onClose, onRegister, onSwitchToLogin }) => {
           value={formData.email}
           onChange={handleInputChange}
           className="modal__input"
+          placeholder="your.email@example.com"
           required
         />
       </div>
@@ -220,6 +222,7 @@ const RegisterModal = ({ isOpen, onClose, onRegister, onSwitchToLogin }) => {
           value={formData.password}
           onChange={handleInputChange}
           className="modal__input"
+          placeholder="••••••••"
           minLength="6"
           required
         />
@@ -234,6 +237,7 @@ const RegisterModal = ({ isOpen, onClose, onRegister, onSwitchToLogin }) => {
           value={formData.confirmPassword}
           onChange={handleInputChange}
           className="modal__input"
+          placeholder="••••••••"
           required
         />
       </div>

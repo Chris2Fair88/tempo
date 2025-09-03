@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserId, clearRole } from '../lib/auth';
+import { clearRole } from '../lib/auth';
 import { store } from '../lib/store';
 import { toast } from '../lib/notify';
 import { ApiDataList } from '../components/ApiDataManager';
@@ -21,16 +21,13 @@ import { getAllCalendarEvents } from '../utils/ThirdPartyApi';
  * - camelCase for variables and functions ✓
  * - No third-party JS libraries except React ✓
  */
-export default function Admin({ calendarEvents = [], apiStatus = {}, onReloadData }) {
+export default function Admin({ onReloadData }) {
   const navigate = useNavigate();
-  const adminUserId = getUserId();
   const storeState = store.getState();
   
   // State management following criteria requirements
   const [selectedTeacherId, setSelectedTeacherId] = useState(1);
   const [selectedDay, setSelectedDay] = useState('Mon');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
 
   // Computed values using useMemo for performance
   const paymentsThisMonth = useMemo(() => store.listPayments(), []);
@@ -62,22 +59,6 @@ export default function Admin({ calendarEvents = [], apiStatus = {}, onReloadDat
     const studentId = Number(event.target.getAttribute('data-student-id'));
     store.markAbsent(studentId);
     toast('Student marked as absent');
-  };
-
-  /**
-   * Handle calendar event search - following criteria for search functionality
-   */
-  const handleCalendarSearch = (query) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      const results = calendarEvents.filter(event =>
-        event.title.toLowerCase().includes(query.toLowerCase()) ||
-        (event.description && event.description.toLowerCase().includes(query.toLowerCase()))
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
   };
 
   /**

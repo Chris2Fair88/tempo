@@ -68,7 +68,7 @@ export const simulateTokenCheck = async (token) => {
     }
     
     return { valid: true, user: { ...user, password: undefined } }
-  } catch (error) {
+  } catch {
     throw new Error('Invalid token')
   }
 }

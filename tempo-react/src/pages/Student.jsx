@@ -1,246 +1,278 @@
-import { useMemo, useState } from 'react';
-import { getUserId } from '../lib/auth';
+import React, { useMemo } from 'react';
 import { store } from '../lib/store';
-import { toast } from '../lib/notify';
 
-export default function Student({ calendarEvents = [], apiStatus = {} }) {
-  const studentId = getUserId() || 1; // fallback to demo student
+/**
+ * Student Dashboard
+ * 
+ * Provides access to student-specific features for music lessons including
+ * practice tracking, lesson schedule, and progress monitoring.
+ */
+
+export default function Student() {
   const s = store.getState();
-  const student = s.students.find(st => st.id === studentId) || s.students[0];
-  const teacher = s.teachers.find(t => t.id === student.teacherId);
-  const week = s.lessons.filter(l => l.studentId === student.id);
-  const [minutes, setMinutes] = useState(20);
-  const [note, setNote] = useState('');
-  const [amount, setAmount] = useState(100);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
-  const [bookedLessons, setBookedLessons] = useState({});
-
-  const logs = useMemo(() => student.practiceLogs.slice().reverse(), [student.practiceLogs]);
-
-  function handleLogout() {
-    clearRole();
-    toast('Successfully logged out', 'success');
-    navigate('/');
-  }
-
-  // Generate next 14 days for lesson booking
-  const generateBookingDays = () => {
-    const days = [];
-    const today = new Date();
-    
-    for (let i = 1; i <= 14; i++) { // Start from tomorrow
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dateString = date.toISOString().split('T')[0];
-      
-      // Check if it's a holiday (teacher unavailable)
-      const isHoliday = calendarEvents.some(event => 
-        event.type === 'holiday' && event.date === dateString
-      );
-      
-      // Check teacher availability (simulate checking localStorage)
-      const teacherAvailability = JSON.parse(localStorage.getItem(`teacher-${student.teacherId}-availability`) || '{}');
-      const isTeacherAvailable = teacherAvailability[dateString] === true;
-      
-      days.push({
-        date: dateString,
-        displayDate: date.toLocaleDateString(),
-        dayName: date.toLocaleDateString('en-US', { weekday: 'long' }),
-        isHoliday,
-        isTeacherAvailable,
-        isBooked: bookedLessons[dateString],
-        isAvailableForBooking: !isHoliday && isTeacherAvailable && !bookedLessons[dateString]
-      });
-    }
-    
-    return days;
-  };
-
-  const timeSlots = [
-    '9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', 
-    '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'
-  ];
-
-  const bookLesson = (date, timeSlot) => {
-    const newBooking = {
-      ...bookedLessons,
-      [date]: timeSlot
-    };
-    setBookedLessons(newBooking);
-    localStorage.setItem(`student-${studentId}-bookings`, JSON.stringify(newBooking));
-    toast(`Lesson booked for ${date} at ${timeSlot}`);
-  };
-
-  const cancelLesson = (date) => {
-    const newBooking = { ...bookedLessons };
-    delete newBooking[date];
-    setBookedLessons(newBooking);
-    localStorage.setItem(`student-${studentId}-bookings`, JSON.stringify(newBooking));
-    toast(`Lesson cancelled for ${date}`);
-  };
-
-  function addLog(e) {
-    e.preventDefault();
-    store.addPracticeLog(student.id, Number(minutes || 0), note);
-    setNote('');
-    toast('Practice log added');
-  }
-
-  function cancelWeek() {
-    store.cancelThisWeek(student.id);
-    toast('This week marked as absent');
-  }
-
-  function payNow() {
-    store.addPayment(student.id, amount);
-    toast('Payment received');
-  }
-
-  const renderHolidayItem = (holiday) => (
-    <div className="api-data-card">
-      <h3>{holiday.title}</h3>
-      <p><strong>Date:</strong> {holiday.date}</p>
-      {holiday.description && <p>{holiday.description}</p>}
-      <div className="api-source">
-        <span className={`source-badge ${holiday.source}`}>
-          {holiday.source === 'google-api' ? '🌐 Live API' : '🎭 Demo'}
-        </span>
-      </div>
-    </div>
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Get current student data
+  const currentStudent = useMemo(() => 
+    s.students.find(student => student.name === currentUser.name) || 
+    s.students[0], // Fallback to first student for demo
+    [s.students, currentUser.name]
   );
 
-  const renderCalendarItem = (event) => (
-    <div className="api-data-card">
-      <h3>{event.title}</h3>
-      <p><strong>Date:</strong> {event.date}</p>
-      {event.description && <p>{event.description}</p>}
-      {event.location && <p><strong>Location:</strong> {event.location}</p>}
-      <div className="api-source">
-        <span className={`source-badge ${event.source}`}>
-          {event.source === 'google-api' ? '� Live API' : '� Demo'}
-        </span>
-      </div>
-    </div>
+  // Get teacher information
+  const myTeacher = useMemo(() => 
+    s.teachers.find(teacher => teacher.id === currentStudent?.teacherId),
+    [s.teachers, currentStudent?.teacherId]
+  );
+
+  // Get my lessons
+  const myLessons = useMemo(() => 
+    s.lessons.filter(lesson => lesson.studentId === currentStudent?.id),
+    [s.lessons, currentStudent?.id]
+  );
+
+  // Get my payments
+  const myPayments = useMemo(() => 
+    store.listPayments().filter(payment => payment.studentId === currentStudent?.id),
+    [currentStudent?.id]
   );
 
   return (
-    <section className="dash">
-      <h1 className="section-title">Student Dashboard</h1>
-      <div className="grid">
-        <section className="card compact">
-          <h2>👨‍🏫 My Teacher</h2>
-          <p>{teacher?.name} — {teacher?.instrument}</p>
-          <p className="help">Contact: {teacher?.email} · {teacher?.phone}</p>
-        </section>
-
-        <section className="card compact">
-          <h2>📚 Weekly Lesson</h2>
-          <ul className="list">
-            {week.map(l => (
-              <li key={l.id} className="list__item">
-                {l.day} {l.time} {l.status === 'absent' && <em>(absent)</em>}
-              </li>
-            ))}
-          </ul>
-          <button className="button mt-8" onClick={cancelWeek}>Cancel this week</button>
-        </section>
-
-        {/* Simplified Lesson Booking */}
-        <section className="card">
-          <h2>📅 Quick Book a Lesson</h2>
-          <p className="help">Select an available time slot with {teacher?.name}.</p>
-          
-          <div className="form">
-            <label className="form__field">
-              <span className="form__label">Select Date & Time</span>
-              <select 
-                value={selectedTimeSlot} 
-                onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                className="form__input"
-              >
-                <option value="">Choose available slot</option>
-                <option value="Mon 3:00 PM">Monday 3:00 PM</option>
-                <option value="Wed 4:00 PM">Wednesday 4:00 PM</option>
-                <option value="Fri 2:00 PM">Friday 2:00 PM</option>
-                <option value="Sat 10:00 AM">Saturday 10:00 AM</option>
-              </select>
-            </label>
-            <button 
-              className="button"
-              onClick={() => {
-                if (selectedTimeSlot) {
-                  toast(`Lesson booked for ${selectedTimeSlot}`);
-                  setSelectedTimeSlot('');
-                }
-              }}
-              disabled={!selectedTimeSlot}
-            >
-              Book Lesson
-            </button>
-          </div>
-        </section>
-
-        <section className="card">
-          <h2>🎵 Practice Log</h2>
-          <form className="form" onSubmit={addLog}>
-            <label className="form__field">
-              <span className="form__label">Minutes</span>
-              <input className="form__input" type="number" min="0" value={minutes} onChange={e=>setMinutes(e.target.value)} />
-            </label>
-            <label className="form__field">
-              <span className="form__label">Note</span>
-              <input className="form__input" value={note} onChange={e=>setNote(e.target.value)} placeholder="What did you practice?" />
-            </label>
-            <button className="button" type="submit">Add</button>
-          </form>
-          <ul className="list mt-8">
-            {logs.slice(0, 3).map(log => (
-              <li key={log.id} className="list__item">{new Date(log.at).toLocaleString()} — {log.minutes}m — {log.note}</li>
-            ))}
-          </ul>
-        </section>
+    <div className="dashboard">
+      <div className="dashboard__header">
+        <h1 className="dashboard__title">Student Dashboard</h1>
+        <p className="dashboard__subtitle">
+          Track your music lessons, practice, and progress
+        </p>
       </div>
 
-      {/* Payments - Full Width Section */}
-      <section className="card full-width">
-        <h2>💳 Payments</h2>
-        <div className="payment-form-centered">
-          <div className="form">
-            <label className="form__field">
-              <span className="form__label">Amount</span>
-              <input className="form__input" type="number" min="0" value={amount} onChange={e=>setAmount(e.target.value)} />
-            </label>
-            <button className="button" onClick={payNow}>Pay Now</button>
+      <div className="dashboard__content">
+        <div className="dashboard__grid">
+          {/* Current Progress */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">🎵 My Progress</h2>
+            </div>
+            <div className="card__content">
+              <div className="music-progress">
+                <div className="progress-item">
+                  <span className="progress-label">Instrument</span>
+                  <span className="progress-value">{currentStudent?.material?.split(' ')[0] || 'Piano'}</span>
+                </div>
+                <div className="progress-item">
+                  <span className="progress-label">Current Method Book</span>
+                  <span className="progress-value">{currentStudent?.material || 'Piano Adventures 2A'}</span>
+                </div>
+                <div className="progress-item">
+                  <span className="progress-label">Lesson Level</span>
+                  <span className="progress-value">Intermediate</span>
+                </div>
+                <div className="progress-item">
+                  <span className="progress-label">Practice Goal</span>
+                  <span className="progress-value">30 min/day</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <ul className="list mt-8">
-            {store.listPaymentsByStudent(student.id).slice(0, 3).map(p => (
-              <li key={p.id} className="list__item">{p.month}: ${p.amount}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
 
-      {/* Upcoming Events - Full Width Section */}
-      <section className="card full-width">
-        <h2>📅 Upcoming Events</h2>
-        <p>Important dates and school closures</p>
-        
-        {calendarEvents.length > 0 ? (
-          <div>
-            <ul className="list">
-              {calendarEvents.slice(0, 6).map(event => (
-                <li key={event.id} className="list__item">
-                  <strong>{event.date}:</strong> {event.title}
-                  {event.type === 'holiday' && <span className="badge holiday">School Closed</span>}
-                  {event.location && <span className="event-location"> • {event.location}</span>}
-                </li>
-              ))}
-            </ul>
+          {/* This Week's Practice */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">📚 Practice Assignments</h2>
+            </div>
+            <div className="card__content">
+              <div className="assignment-list">
+                <div className="practice-assignment">
+                  <div className="assignment-info">
+                    <h3 className="assignment-title">Scales & Arpeggios</h3>
+                    <p className="assignment-details">C Major scale, both hands</p>
+                  </div>
+                  <div className="assignment-status completed">
+                    ✅ Practiced
+                  </div>
+                </div>
+                <div className="practice-assignment">
+                  <div className="assignment-info">
+                    <h3 className="assignment-title">Bach Minuet in G</h3>
+                    <p className="assignment-details">Focus on left hand articulation</p>
+                  </div>
+                  <div className="assignment-status pending">
+                    🎯 In Progress
+                  </div>
+                </div>
+                <div className="practice-assignment">
+                  <div className="assignment-info">
+                    <h3 className="assignment-title">Sight Reading</h3>
+                    <p className="assignment-details">Book 2, pages 15-18</p>
+                  </div>
+                  <div className="assignment-status upcoming">
+                    📅 This Week
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <p className="help">No upcoming events scheduled</p>
-        )}
-      </section>
-    </section>
+
+          {/* Lesson Schedule */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">📅 Lesson Schedule</h2>
+            </div>
+            <div className="card__content">
+              <div className="lesson-schedule">
+                {myLessons.length > 0 ? (
+                  myLessons.map(lesson => (
+                    <div key={lesson.id} className="lesson-item">
+                      <span className="lesson-day">{lesson.day}</span>
+                      <span className="lesson-time">{lesson.time}</span>
+                      <span className="lesson-teacher">{myTeacher?.name}</span>
+                      <span className={`lesson-status ${lesson.status}`}>
+                        {lesson.status === 'scheduled' ? '✅ Confirmed' : 
+                         lesson.status === 'absent' ? '❌ Missed' : '⏰ Pending'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="help">No lessons scheduled this week</p>
+                )}
+                
+                {/* Next lesson info */}
+                <div className="next-lesson">
+                  <h4>Next Lesson:</h4>
+                  <p><strong>Monday 2:00 PM</strong> with {myTeacher?.name || 'Your Teacher'}</p>
+                  <p>Practice Room A • 30 minutes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Teacher Information */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">👨‍🏫 My Teacher</h2>
+            </div>
+            <div className="card__content">
+              {myTeacher ? (
+                <div className="teacher-info">
+                  <h3>{myTeacher.name}</h3>
+                  <p><strong>Instrument:</strong> {myTeacher.instrument}</p>
+                  <div className="contact-info">
+                    <p>{myTeacher.email}</p>
+                    <p>{myTeacher.phone}</p>
+                  </div>
+                  <div className="teacher-notes">
+                    <h4>Recent Lesson Notes:</h4>
+                    <p>"Great progress on scales! Focus on smooth finger transitions for next week."</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="help">Teacher information not available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Practice Log */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">⏱️ Practice Log</h2>
+            </div>
+            <div className="card__content">
+              <div className="practice-stats">
+                <div className="stat-item">
+                  <span className="stat-number">4.5</span>
+                  <span className="stat-label">Hours This Week</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">25</span>
+                  <span className="stat-label">Min/Day Average</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">6</span>
+                  <span className="stat-label">Days Practiced</span>
+                </div>
+              </div>
+              
+              <div className="practice-entries">
+                <h4>Recent Practice Sessions:</h4>
+                <div className="practice-entry">
+                  <span className="practice-date">Today</span>
+                  <span className="practice-duration">30 min</span>
+                  <span className="practice-focus">Scales, Bach Minuet</span>
+                </div>
+                <div className="practice-entry">
+                  <span className="practice-date">Yesterday</span>
+                  <span className="practice-duration">45 min</span>
+                  <span className="practice-focus">Technique, Sight reading</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Information */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">💳 Payment Status</h2>
+            </div>
+            <div className="card__content">
+              {myPayments.length > 0 ? (
+                <div className="payment-info">
+                  <div className="payment-current">
+                    <h4>Current Month: Paid ✅</h4>
+                    <p>Amount: ${myPayments[myPayments.length - 1]?.amount || 120}</p>
+                    <p>Next payment due: October 1st</p>
+                  </div>
+                  
+                  <div className="payment-history">
+                    <h4>Payment History:</h4>
+                    {myPayments.slice(-3).map(payment => (
+                      <div key={payment.id} className="payment-record">
+                        <span>${payment.amount}</span>
+                        <span>{payment.month}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="help">No payment information available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Upcoming Events */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">🎭 Upcoming Events</h2>
+            </div>
+            <div className="card__content">
+              <div className="events-list">
+                <div className="event-item">
+                  <div className="event-date">
+                    <span className="event-month">Oct</span>
+                    <span className="event-day">15</span>
+                  </div>
+                  <div className="event-details">
+                    <h4>Spring Music Recital</h4>
+                    <p>Perform your pieces for family and friends</p>
+                    <p className="event-location">Main Performance Hall</p>
+                  </div>
+                </div>
+                
+                <div className="event-item">
+                  <div className="event-date">
+                    <span className="event-month">Oct</span>
+                    <span className="event-day">28</span>
+                  </div>
+                  <div className="event-details">
+                    <h4>Piano Masterclass</h4>
+                    <p>Special workshop with guest artist</p>
+                    <p className="event-location">Studio B</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

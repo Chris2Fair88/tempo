@@ -194,7 +194,7 @@ function formatEventDate(event) {
       month: 'long',
       day: 'numeric'
     });
-  } catch (error) {
+  } catch {
     return 'Date TBD';
   }
 }
