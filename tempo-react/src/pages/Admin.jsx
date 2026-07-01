@@ -144,8 +144,7 @@ export default function Admin({ calendarEvents = [] }) {
                       <h3>{st.name}</h3>
                       <p><strong>Teacher:</strong> {teacher?.name}</p>
                       <div className="contact-info">
-                        <span>{st.email}</span>
-                        <span>{st.phone}</span>
+                        <span>{st.email} • {st.phone}</span>
                       </div>
                       <div className="student-progress">
                         <div className="progress-item">

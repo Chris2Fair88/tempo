@@ -56,19 +56,19 @@ export default function Student() {
             <div className="card__content">
               <div className="music-progress">
                 <div className="progress-item">
-                  <span className="progress-label">Instrument</span>
+                  <span className="progress-label">Instrument:</span>{' '}
                   <span className="progress-value">{currentStudent?.material?.split(' ')[0] || 'Piano'}</span>
                 </div>
                 <div className="progress-item">
-                  <span className="progress-label">Current Method Book</span>
+                  <span className="progress-label">Current Method Book:</span>{' '}
                   <span className="progress-value">{currentStudent?.material || 'Piano Adventures 2A'}</span>
                 </div>
                 <div className="progress-item">
-                  <span className="progress-label">Lesson Level</span>
+                  <span className="progress-label">Lesson Level:</span>{' '}
                   <span className="progress-value">Intermediate</span>
                 </div>
                 <div className="progress-item">
-                  <span className="progress-label">Practice Goal</span>
+                  <span className="progress-label">Practice Goal:</span>{' '}
                   <span className="progress-value">30 min/day</span>
                 </div>
               </div>
@@ -123,11 +123,11 @@ export default function Student() {
                 {myLessons.length > 0 ? (
                   myLessons.map(lesson => (
                     <div key={lesson.id} className="lesson-item">
-                      <span className="lesson-day">{lesson.day}</span>
-                      <span className="lesson-time">{lesson.time}</span>
-                      <span className="lesson-teacher">{myTeacher?.name}</span>
+                      <span className="lesson-day">{lesson.day}</span>{' '}
+                      <span className="lesson-time">{lesson.time}</span>{' '}
+                      <span className="lesson-teacher">with {myTeacher?.name}</span>{' '}
                       <span className={`lesson-status ${lesson.status}`}>
-                        {lesson.status === 'scheduled' ? '✅ Confirmed' : 
+                        {lesson.status === 'scheduled' ? '✅ Confirmed' :
                          lesson.status === 'absent' ? '❌ Missed' : '⏰ Pending'}
                       </span>
                     </div>
@@ -195,13 +195,13 @@ export default function Student() {
               <div className="practice-entries">
                 <h4>Recent Practice Sessions:</h4>
                 <div className="practice-entry">
-                  <span className="practice-date">Today</span>
-                  <span className="practice-duration">30 min</span>
+                  <span className="practice-date">Today</span>{' • '}
+                  <span className="practice-duration">30 min</span>{' • '}
                   <span className="practice-focus">Scales, Bach Minuet</span>
                 </div>
                 <div className="practice-entry">
-                  <span className="practice-date">Yesterday</span>
-                  <span className="practice-duration">45 min</span>
+                  <span className="practice-date">Yesterday</span>{' • '}
+                  <span className="practice-duration">45 min</span>{' • '}
                   <span className="practice-focus">Technique, Sight reading</span>
                 </div>
               </div>
@@ -226,7 +226,7 @@ export default function Student() {
                     <h4>Payment History:</h4>
                     {myPayments.slice(-3).map(payment => (
                       <div key={payment.id} className="payment-record">
-                        <span>${payment.amount}</span>
+                        <span>${payment.amount}</span>{' '}
                         <span>{payment.month}</span>
                       </div>
                     ))}
@@ -247,7 +247,7 @@ export default function Student() {
               <div className="events-list">
                 <div className="event-item">
                   <div className="event-date">
-                    <span className="event-month">Oct</span>
+                    <span className="event-month">Oct</span>{' '}
                     <span className="event-day">15</span>
                   </div>
                   <div className="event-details">
@@ -259,7 +259,7 @@ export default function Student() {
                 
                 <div className="event-item">
                   <div className="event-date">
-                    <span className="event-month">Oct</span>
+                    <span className="event-month">Oct</span>{' '}
                     <span className="event-day">28</span>
                   </div>
                   <div className="event-details">

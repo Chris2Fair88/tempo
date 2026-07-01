@@ -18,9 +18,10 @@ const demo = {
     { id: 102, studentId: 2, teacherId: 1, day: 'Tue', time: '4:00p', status: 'scheduled' },
     { id: 103, studentId: 3, teacherId: 2, day: 'Thu', time: '6:00p', status: 'absent' },
   ],
+  // Dated to "this month" at load time so the demo never shows stale $0 revenue.
   payments: [
-    { id: 201, studentId: 1, amount: 120, month: '2025-08' },
-    { id: 202, studentId: 2, amount: 100, month: '2025-08' },
+    { id: 201, studentId: 1, amount: 120, month: new Date().toISOString().slice(0, 7) },
+    { id: 202, studentId: 2, amount: 100, month: new Date().toISOString().slice(0, 7) },
   ],
   timeOff: [ /* { teacherId, day } */ ],
   contacts: [ /* { name, email, phone, message } */ ],

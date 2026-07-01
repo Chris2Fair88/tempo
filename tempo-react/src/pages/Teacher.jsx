@@ -127,7 +127,7 @@ export default function Teacher() {
                     <li key={student.id} className="list__item">
                       <strong>{student.name}</strong>
                       <div className="student-details">
-                        <span className="student-level">Level: {student.level || 'Beginner'}</span>
+                        <span className="student-level">Level: {student.level || 'Beginner'}</span>{' • '}
                         <span className="student-progress">Progress: {student.progress || 'Good'}</span>
                       </div>
                       <div className="contact-info">
@@ -180,7 +180,7 @@ export default function Teacher() {
                     {lessons.length > 0 ? (
                       lessons.map(lesson => (
                         <div className="lesson-slot" key={lesson.id}>
-                          <span className="lesson-time">{lesson.time}</span>
+                          <span className="lesson-time">{lesson.time}</span>{' '}
                           <span className="lesson-student">
                             {lesson.studentName}
                             {lesson.status === 'absent' ? ' (absent)' : ''}
@@ -209,14 +209,15 @@ export default function Teacher() {
                   {myStudents.map(student => (
                     <div key={student.id} className="progress-item">
                       <div className="progress-header">
-                        <strong>{student.name}</strong>
-                        <span className="progress-level">{student.level || 'Beginner'}</span>
+                        <strong>{student.name}</strong>{' '}
+                        <span className="progress-level">({student.level || 'Beginner'})</span>
                       </div>
                       <div className="progress-bar">
                         <div className="progress-fill" style={{width: '75%'}}></div>
                       </div>
                       <div className="progress-notes">
                         <span>Last lesson: Scales and arpeggios</span>
+                        <br />
                         <span>Next goal: Bach Invention No. 1</span>
                       </div>
                     </div>

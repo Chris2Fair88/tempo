@@ -92,11 +92,11 @@ export default function Parent() {
                 {childLessons.length > 0 ? (
                   childLessons.map(lesson => (
                     <div key={lesson.id} className="lesson-item">
-                      <span className="lesson-day">{lesson.day}</span>
-                      <span className="lesson-time">{lesson.time}</span>
-                      <span className="lesson-teacher">{childTeacher?.name}</span>
+                      <span className="lesson-day">{lesson.day}</span>{' '}
+                      <span className="lesson-time">{lesson.time}</span>{' '}
+                      <span className="lesson-teacher">with {childTeacher?.name}</span>{' '}
                       <span className={`lesson-status ${lesson.status}`}>
-                        {lesson.status === 'scheduled' ? '✅ Confirmed' : 
+                        {lesson.status === 'scheduled' ? '✅ Confirmed' :
                          lesson.status === 'absent' ? '❌ Missed' : '⏰ Pending'}
                       </span>
                     </div>
@@ -125,32 +125,25 @@ export default function Parent() {
                 <h4>This Week's Practice</h4>
                 <div className="practice-days">
                   <div className="practice-day completed">
-                    <span>Mon</span>
-                    <span>30 min</span>
+                    <span>Mon:</span>{' '}<span>30 min</span>
                   </div>
                   <div className="practice-day completed">
-                    <span>Tue</span>
-                    <span>25 min</span>
+                    <span>Tue:</span>{' '}<span>25 min</span>
                   </div>
                   <div className="practice-day completed">
-                    <span>Wed</span>
-                    <span>35 min</span>
+                    <span>Wed:</span>{' '}<span>35 min</span>
                   </div>
                   <div className="practice-day missed">
-                    <span>Thu</span>
-                    <span>0 min</span>
+                    <span>Thu:</span>{' '}<span>0 min</span>
                   </div>
                   <div className="practice-day completed">
-                    <span>Fri</span>
-                    <span>40 min</span>
+                    <span>Fri:</span>{' '}<span>40 min</span>
                   </div>
                   <div className="practice-day upcoming">
-                    <span>Sat</span>
-                    <span>--</span>
+                    <span>Sat:</span>{' '}<span>--</span>
                   </div>
                   <div className="practice-day upcoming">
-                    <span>Sun</span>
-                    <span>--</span>
+                    <span>Sun:</span>{' '}<span>--</span>
                   </div>
                 </div>
                 
@@ -211,8 +204,8 @@ export default function Parent() {
                 <div className="current-status">
                   <h4>Current Month Status</h4>
                   <div className="payment-status paid">
-                    <span className="status-icon">✅</span>
-                    <span>September 2025 - PAID</span>
+                    <span className="status-icon">✅</span>{' '}
+                    <span>This month - PAID</span>{' '}
                     <span className="amount">${paymentHistory[paymentHistory.length - 1]?.amount || 120}</span>
                   </div>
                   <p><strong>Next payment due:</strong> October 1, 2025</p>
@@ -228,8 +221,8 @@ export default function Parent() {
                   <h4>Recent Payments</h4>
                   {paymentHistory.slice(-3).map(payment => (
                     <div key={payment.id} className="payment-record">
-                      <span className="payment-month">{payment.month}</span>
-                      <span className="payment-amount">${payment.amount}</span>
+                      <span className="payment-month">{payment.month}</span>{' '}
+                      <span className="payment-amount">${payment.amount}</span>{' '}
                       <span className="payment-status">✅ Paid</span>
                     </div>
                   ))}
@@ -247,7 +240,7 @@ export default function Parent() {
               <div className="parent-events">
                 <div className="event-item">
                   <div className="event-date">
-                    <span className="event-month">Oct</span>
+                    <span className="event-month">Oct</span>{' '}
                     <span className="event-day">15</span>
                   </div>
                   <div className="event-details">
@@ -260,7 +253,7 @@ export default function Parent() {
                 
                 <div className="event-item">
                   <div className="event-date">
-                    <span className="event-month">Oct</span>
+                    <span className="event-month">Oct</span>{' '}
                     <span className="event-day">22</span>
                   </div>
                   <div className="event-details">
