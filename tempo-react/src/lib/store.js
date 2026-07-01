@@ -4,19 +4,19 @@ const STORAGE_KEY = 'tempo-store-v1';
 
 const demo = {
   teachers: [
-    { id: 1, name: 'Priya', instrument: 'Piano', email: 'priya@example.com', phone: '555-0101', studentNotes: {} },
-    { id: 2, name: 'Sam', instrument: 'Guitar', email: 'sam@example.com', phone: '555-0102', studentNotes: {} },
+    { id: 1, name: 'Daniel Okafor', instrument: 'Guitar', email: 'daniel.okafor@example.com', phone: '555-0101', studentNotes: {} },
+    { id: 2, name: 'Maya Reyes', instrument: 'Piano', email: 'maya.reyes@example.com', phone: '555-0102', studentNotes: {} },
   ],
   students: [
-    { id: 1, name: 'Jamie', email: 'jamie@example.com', phone: '555-0201', teacherId: 1, material: 'Piano Adventures 2A', practiceLogs: [] },
-    { id: 2, name: 'Alex',  email: 'alex@example.com',  phone: '555-0202', teacherId: 2, material: 'Hal Leonard Guitar 1', practiceLogs: [] },
-    { id: 3, name: 'Riley', email: 'riley@example.com', phone: '555-0203', teacherId: 1, material: 'Piano Adventures 1', practiceLogs: [] },
+    { id: 1, name: 'Ethan Carter', email: 'ethan.carter@example.com', phone: '555-0201', teacherId: 2, material: 'Piano Adventures 2A', practiceLogs: [] },
+    { id: 2, name: 'Noah Sullivan',  email: 'noah.sullivan@example.com',  phone: '555-0202', teacherId: 1, material: 'Hal Leonard Guitar 1', practiceLogs: [] },
+    { id: 3, name: 'Olivia Bennett', email: 'olivia.bennett@example.com', phone: '555-0203', teacherId: 2, material: 'Voice Foundations 1', practiceLogs: [] },
   ],
   // Week plan: one lesson per student; status: scheduled|absent|cancelled
   lessons: [
-    { id: 101, studentId: 1, teacherId: 1, day: 'Mon', time: '5:30p', status: 'scheduled' },
-    { id: 102, studentId: 2, teacherId: 2, day: 'Tue', time: '4:00p', status: 'scheduled' },
-    { id: 103, studentId: 3, teacherId: 1, day: 'Thu', time: '6:00p', status: 'absent' },
+    { id: 101, studentId: 1, teacherId: 2, day: 'Mon', time: '5:30p', status: 'scheduled' },
+    { id: 102, studentId: 2, teacherId: 1, day: 'Tue', time: '4:00p', status: 'scheduled' },
+    { id: 103, studentId: 3, teacherId: 2, day: 'Thu', time: '6:00p', status: 'absent' },
   ],
   payments: [
     { id: 201, studentId: 1, amount: 120, month: '2025-08' },

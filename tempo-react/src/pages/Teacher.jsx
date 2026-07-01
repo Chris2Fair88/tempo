@@ -1,21 +1,37 @@
 import { useMemo } from 'react';
 import { store } from '../lib/store';
+import { getUserData } from '../lib/auth';
 
 /**
  * Teacher Dashboard
- * 
+ *
  * Provides access to teacher-specific features including student management,
  * lesson planning, and schedule oversight.
  */
 
+const WEEKDAYS = [
+  { key: 'Mon', label: 'Monday' },
+  { key: 'Tue', label: 'Tuesday' },
+  { key: 'Wed', label: 'Wednesday' },
+  { key: 'Thu', label: 'Thursday' },
+  { key: 'Fri', label: 'Friday' },
+];
+
 export default function Teacher() {
   const s = store.getState();
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  
+  const currentUser = getUserData() || {};
+
+  // The logged-in identity (mockAuth) and the roster (store.js) are separate mock datasets
+  // with unrelated ID spaces, so resolve the matching teacher record by name.
+  const myTeacherRecord = useMemo(() =>
+    s.teachers.find(t => t.name === currentUser.name) || s.teachers[0],
+    [s.teachers, currentUser.name]
+  );
+
   // Get students assigned to this teacher
-  const myStudents = useMemo(() => 
-    s.students.filter(student => student.teacherId === currentUser.id),
-    [s.students, currentUser.id]
+  const myStudents = useMemo(() =>
+    s.students.filter(student => student.teacherId === myTeacherRecord?.id),
+    [s.students, myTeacherRecord]
   );
 
   // Get recent payments for my students
@@ -27,6 +43,16 @@ export default function Teacher() {
   }, [myStudents]);
 
   const totalRevenue = myStudentPayments.reduce((sum, p) => sum + p.amount, 0);
+
+  // This week's lessons for the logged-in teacher, grouped by day
+  const myWeek = useMemo(() =>
+    store.getTeacherWeek(myTeacherRecord?.id),
+    [myTeacherRecord, s.lessons]
+  );
+  const weekByDay = WEEKDAYS.map(({ key, label }) => ({
+    key, label,
+    lessons: myWeek.filter(l => l.day === key),
+  }));
 
   return (
     <div className="dashboard">
@@ -148,31 +174,26 @@ export default function Teacher() {
             </div>
             <div className="card__content">
               <div className="schedule-grid">
-                <div className="schedule-day">
-                  <h4>Monday</h4>
-                  <div className="lesson-slot">
-                    <span className="lesson-time">2:00 PM</span>
-                    <span className="lesson-student">Harmony Mitchell</span>
+                {weekByDay.map(({ key, label, lessons }) => (
+                  <div className="schedule-day" key={key}>
+                    <h4>{label}</h4>
+                    {lessons.length > 0 ? (
+                      lessons.map(lesson => (
+                        <div className="lesson-slot" key={lesson.id}>
+                          <span className="lesson-time">{lesson.time}</span>
+                          <span className="lesson-student">
+                            {lesson.studentName}
+                            {lesson.status === 'absent' ? ' (absent)' : ''}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="lesson-slot">
+                        <span className="lesson-student">No lessons scheduled</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="lesson-slot">
-                    <span className="lesson-time">4:00 PM</span>
-                    <span className="lesson-student">Open Slot</span>
-                  </div>
-                </div>
-                <div className="schedule-day">
-                  <h4>Wednesday</h4>
-                  <div className="lesson-slot">
-                    <span className="lesson-time">3:00 PM</span>
-                    <span className="lesson-student">Available</span>
-                  </div>
-                </div>
-                <div className="schedule-day">
-                  <h4>Friday</h4>
-                  <div className="lesson-slot">
-                    <span className="lesson-time">1:00 PM</span>
-                    <span className="lesson-student">Group Practice</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

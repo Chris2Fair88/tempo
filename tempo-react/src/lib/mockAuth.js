@@ -31,7 +31,7 @@ export const MOCK_USERS = [
     email: 'teacher@tempo-music.edu',
     password: 'teacher123',
     role: 'teacher',
-    name: 'Elena Andante',
+    name: 'Maya Reyes',
     instrument: 'Piano',
     specialties: ['Classical', 'Jazz', 'Music Theory']
   },
@@ -40,7 +40,7 @@ export const MOCK_USERS = [
     email: 'piano.teacher@tempo-music.edu',
     password: 'teacher123',
     role: 'teacher',
-    name: 'Elena Andante',
+    name: 'Maya Reyes',
     instrument: 'Piano',
     specialties: ['Classical', 'Jazz', 'Music Theory']
   },
