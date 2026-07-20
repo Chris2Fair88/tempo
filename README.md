@@ -6,7 +6,6 @@ A minimal, front-end–only scheduling demo for an in‑home music teaching busi
 - Three dashboards: Admin, Teacher, Student — all populated from the Mock API
 - Mock API (mockData.js) returning Promises (no backend)
 - Shared role guard + logout via localStorage (`tempo-role`, see auth.js)
-- Shared dark/light theme toggle available on every page (see theme.js)
 - Responsive layout with a mobile nav menu
 - Zero build tools or deps (static files)
 
@@ -22,9 +21,8 @@ A minimal, front-end–only scheduling demo for an in‑home music teaching busi
 - student.html — student dashboard
 - styles.css — site styles
 - mockData.js — in‑memory “API” (stats, teachers, students, lessons)
-- theme.js — shared dark/light theme init + toggle
 - auth.js — shared role guard + logout helper
-- site.js — shared page wiring (footer year, mobile nav, theme toggle, logout button)
+- site.js — shared page wiring (footer year, mobile nav, logout button)
 
 ## Quick Start
 1) Open this folder in VS Code.
