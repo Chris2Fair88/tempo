@@ -4,26 +4,34 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tempo — Keeping Things on Time</title>
+    <meta name="description" content="Simple scheduling for in-home music lessons — book, manage availability, and keep everyone in sync." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310B981'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%99%AB%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./theme.js"></script>
+    <script>Theme.applyInitial();</script>
   </head>
-  <body class="theme theme--dark-violet">
+  <body>
     <header class="site-header">
       <div class="container site-header__inner">
         <a class="site-header__brand" href="/">
           <span class="site-header__logo" aria-hidden="true">♫</span>
           <span class="site-header__name">Tempo</span>
         </a>
-        <nav class="site-header__nav" aria-label="Main">
+        <nav class="site-header__nav" id="siteNav" aria-label="Main">
           <a class="site-header__link" href="#features">Features</a>
           <a class="site-header__link" href="#how-it-works">How it works</a>
           <a class="site-header__link" href="#contact">Contact</a>
           <a class="site-header__link" href="./login.html">Login</a>
         </nav>
-        <div style="display:flex; gap:12px; align-items:center;">
+        <div class="site-header__actions">
           <a class="button button--primary site-header__cta" href="#cta">Schedule a Lesson</a>
           <button id="themeToggle" class="button theme-toggle theme-toggle--icon" type="button" aria-pressed="false">
             <span class="sr-only">Toggle dark mode</span>
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+          </button>
+          <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="siteNav">
+            <span class="sr-only">Toggle navigation menu</span>
+            <span aria-hidden="true">☰</span>
           </button>
         </div>
       </div>
@@ -101,50 +109,7 @@
         <p class="site-footer__brand">Tempo</p>
         <p class="site-footer__meta">© <span id="year"></span> Tempo. All rights reserved.</p>
       </div>
-      <script>
-        // Footer year
-        document.getElementById('year').textContent = new Date().getFullYear();
-
-        // Theme init: preferred from storage or system
-        const root = document.documentElement;
-        const STORAGE_KEY = 'tempo-theme';
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-  function applyTheme(theme) {
-          if (theme === 'dark') {
-            root.setAttribute('data-theme', 'dark');
-            toggleBtn.setAttribute('aria-pressed', 'true');
-            icon.textContent = '🌞';
-          } else {
-            root.removeAttribute('data-theme');
-            toggleBtn.setAttribute('aria-pressed', 'false');
-            icon.textContent = '🌙';
-          }
-        }
-
-        const saved = localStorage.getItem(STORAGE_KEY);
-        const initial = saved || (prefersDark.matches ? 'dark' : 'light');
-        const toggleBtn = document.getElementById('themeToggle');
-  const icon = toggleBtn.querySelector('.theme-toggle__icon');
-        applyTheme(initial);
-
-        toggleBtn.addEventListener('click', () => {
-          // Add a temporary class for smooth transitions
-          if (!root.classList.contains('theme-animate')) {
-            root.classList.add('theme-animate');
-            setTimeout(() => root.classList.remove('theme-animate'), 550);
-          }
-          const isDark = root.getAttribute('data-theme') === 'dark';
-          const next = isDark ? 'light' : 'dark';
-          applyTheme(next);
-          localStorage.setItem(STORAGE_KEY, next);
-        });
-
-        // React to system preference changes when user hasn't chosen
-        prefersDark.addEventListener('change', e => {
-          const savedNow = localStorage.getItem(STORAGE_KEY);
-          if (!savedNow) applyTheme(e.matches ? 'dark' : 'light');
-        });
-      </script>
     </footer>
+    <script src="./site.js"></script>
   </body>
 </html>

@@ -3,10 +3,11 @@
 A minimal, front-end–only scheduling demo for an in‑home music teaching business. Built as a bootcamp final project to showcase an MVP with clean structure, mock data, and role‑based dashboards.
 
 ## Highlights
-- Three dashboards: Admin, Teacher, Student
+- Three dashboards: Admin, Teacher, Student — all populated from the Mock API
 - Mock API (mockData.js) returning Promises (no backend)
-- Simple role guard via localStorage (`tempo-role`)
-- Responsive layout with plain HTML/CSS
+- Shared role guard + logout via localStorage (`tempo-role`, see auth.js)
+- Shared dark/light theme toggle available on every page (see theme.js)
+- Responsive layout with a mobile nav menu
 - Zero build tools or deps (static files)
 
 ## Tech
@@ -21,6 +22,9 @@ A minimal, front-end–only scheduling demo for an in‑home music teaching busi
 - student.html — student dashboard
 - styles.css — site styles
 - mockData.js — in‑memory “API” (stats, teachers, students, lessons)
+- theme.js — shared dark/light theme init + toggle
+- auth.js — shared role guard + logout helper
+- site.js — shared page wiring (footer year, mobile nav, theme toggle, logout button)
 
 ## Quick Start
 1) Open this folder in VS Code.
@@ -42,7 +46,7 @@ All data is static mock data for demonstration.
 - Persist mock data to localStorage with basic CRUD
 - Booking form and validation
 - Export lessons to .ics (and optional Google Calendar add)
-- Basic auth mock and loading states
+- Loading states while Mock API promises resolve
 
 ## Notes
 This is a demo MVP for portfolio purposes; not intended for production use.

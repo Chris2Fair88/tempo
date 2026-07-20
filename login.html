@@ -4,7 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tempo — Login</title>
+    <meta name="description" content="Sign in to Tempo — mock scheduling for in-home music lessons." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310B981'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%99%AB%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./theme.js"></script>
+    <script src="./auth.js"></script>
+    <script>Theme.applyInitial();</script>
   </head>
   <body>
     <header class="site-header">
@@ -13,6 +18,12 @@
           <span class="site-header__logo" aria-hidden="true">♫</span>
           <span class="site-header__name">Tempo</span>
         </a>
+        <div class="site-header__actions">
+          <button id="themeToggle" class="button theme-toggle theme-toggle--icon" type="button" aria-pressed="false">
+            <span class="sr-only">Toggle dark mode</span>
+            <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -47,6 +58,7 @@
       </div>
     </main>
 
+    <script src="./site.js"></script>
     <script>
       // Minimal demo auth: store role and redirect
       const form = document.getElementById('loginForm');
@@ -54,13 +66,8 @@
         e.preventDefault();
         const data = new FormData(form);
         const role = data.get('role');
-        localStorage.setItem('tempo-role', role);
-        const routes = {
-          student: 'student.html',
-          teacher: 'teacher.html',
-          admin: 'admin.html',
-        };
-        window.location.href = routes[role] || 'index.html';
+        Auth.setRole(role);
+        window.location.href = Auth.routeFor(role);
       });
     </script>
   </body>

@@ -4,7 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tempo — Admin</title>
+    <meta name="description" content="Tempo admin dashboard — teachers, students, and recent bookings at a glance." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310B981'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%99%AB%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./theme.js"></script>
+    <script src="./auth.js"></script>
+    <script>
+      Theme.applyInitial();
+      Auth.requireRole('admin');
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -13,6 +21,14 @@
           <span class="site-header__logo" aria-hidden="true">♫</span>
           <span class="site-header__name">Tempo</span>
         </a>
+        <div class="site-header__actions">
+          <a class="button button--ghost" href="./index.html">Home</a>
+          <button id="logoutBtn" class="button button--ghost" type="button">Logout</button>
+          <button id="themeToggle" class="button theme-toggle theme-toggle--icon" type="button" aria-pressed="false">
+            <span class="sr-only">Toggle dark mode</span>
+            <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
       </div>
     </header>
     <main class="dash">
@@ -21,26 +37,28 @@
         <div class="grid">
           <section class="card">
             <h2>At a Glance</h2>
-            <div class="stack">
-              <div><strong>Teachers:</strong> 5</div>
-              <div><strong>Students:</strong> 28</div>
-              <div><strong>Lessons this week:</strong> 42</div>
-            </div>
+            <div class="stack" id="adminStats"></div>
           </section>
           <section class="card">
             <h2>Recent Bookings</h2>
-            <ul class="list">
-              <li class="list__item">Jamie booked Piano with Priya — Thu 6:00p</li>
-              <li class="list__item">Alex booked Guitar with Sam — Mon 4:00p</li>
-            </ul>
+            <ul class="list" id="adminBookings"></ul>
           </section>
         </div>
       </div>
     </main>
+    <script src="./mockData.js"></script>
+    <script src="./site.js"></script>
     <script>
-      // Guard by role (demo)
-      const role = localStorage.getItem('tempo-role');
-      if (role !== 'admin') window.location.replace('login.html');
+      Promise.all([MockAPI.getAdminStats(), MockAPI.getRecentBookings()]).then(([stats, bookings]) => {
+        document.getElementById('adminStats').innerHTML = `
+          <div><strong>Teachers:</strong> ${stats.teachers}</div>
+          <div><strong>Students:</strong> ${stats.students}</div>
+          <div><strong>Lessons this week:</strong> ${stats.lessonsThisWeek}</div>
+        `;
+        document.getElementById('adminBookings').innerHTML = bookings
+          .map((item) => `<li class="list__item">${item}</li>`)
+          .join('');
+      });
     </script>
   </body>
 </html>

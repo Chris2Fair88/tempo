@@ -26,26 +26,32 @@
 
     // Optional extras for dashboards
     getAdminStats() {
-      return Promise.resolve({ teachers: 2, students: 2, lessonsThisWeek: 2 });
+      return Promise.resolve({ teachers: 5, students: 28, lessonsThisWeek: 42 });
     },
     getRecentBookings(limit = 5) {
       const items = [
         'Jamie booked Piano with Priya — Thu 6:00p',
-        'Alex booked Guitar with Sam — Sat 4:00p',
+        'Alex booked Guitar with Sam — Mon 4:00p',
       ];
       return Promise.resolve(items.slice(0, limit));
     },
     getTeacherTodayLessons(teacherId = 1) {
       return Promise.resolve([
         '4:00p — Guitar with Alex (Home)',
-        '6:00p — Piano with Jamie (Home)',
+        '5:30p — Piano with Jamie (Home)',
       ]);
+    },
+    getTeacherAvailability(teacherId = 1) {
+      return Promise.resolve('Mon 4–7p, Tue 5–8p, Thu 6–8p');
     },
     getStudentUpcomingLessons(studentId = 1) {
       return Promise.resolve([
+        'Tue 5:30p — Piano with Jamie',
         'Thu 6:00p — Piano with Priya',
-        'Sat 4:00p — Guitar with Sam',
       ]);
+    },
+    getStudentProfile(studentId = 1) {
+      return Promise.resolve({ name: 'Demo Student', instrument: 'Piano' });
     },
   };
 
