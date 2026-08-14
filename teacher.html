@@ -4,7 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tempo — Teacher</title>
+    <meta name="description" content="Tempo teacher dashboard — today's lessons and weekly availability." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2310B981'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%99%AB%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./auth.js"></script>
+    <script>
+      Auth.requireRole('teacher');
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -13,6 +19,10 @@
           <span class="site-header__logo" aria-hidden="true">♫</span>
           <span class="site-header__name">Tempo</span>
         </a>
+        <div class="site-header__actions">
+          <a class="button button--ghost" href="./index.html">Home</a>
+          <button id="logoutBtn" class="button button--ghost" type="button">Logout</button>
+        </div>
       </div>
     </header>
     <main class="dash">
@@ -26,22 +36,23 @@
           <section class="card">
             <h2>Availability</h2>
             <div class="stack">
-              <div>Mon 4–7p, Tue 5–8p, Thu 6–8p</div>
+              <div id="teacherAvailability"></div>
             </div>
           </section>
         </div>
       </div>
     </main>
+    <script src="./mockData.js"></script>
+    <script src="./site.js"></script>
     <script>
-      // Guard by role (demo)
-      const role = localStorage.getItem('tempo-role');
-      if (role !== 'teacher') window.location.replace('login.html');
-      // Demo data
-      const list = document.getElementById('teacherToday');
-      list.innerHTML = `
-        <li class="list__item">4:00p — Guitar with Alex (Home)</li>
-        <li class="list__item">5:30p — Piano with Jamie (Home)</li>
-      `;
+      Promise.all([MockAPI.getTeacherTodayLessons(), MockAPI.getTeacherAvailability()]).then(
+        ([lessons, availability]) => {
+          document.getElementById('teacherToday').innerHTML = lessons
+            .map((item) => `<li class="list__item">${item}</li>`)
+            .join('');
+          document.getElementById('teacherAvailability').textContent = availability;
+        }
+      );
     </script>
   </body>
 </html>
