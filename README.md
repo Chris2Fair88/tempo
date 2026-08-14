@@ -40,6 +40,24 @@ MockAPI.getRecentBookings().then(items => console.log(items));
 ```
 All data is static mock data for demonstration.
 
+## AI Integration (MCP)
+Tempo's dashboards aren't the only thing reading `mockData.js`. A companion MCP server
+(`Tempo_MCP_Showcase`) exposes the same mock records as tools an AI assistant can call
+directly — `list_teachers`, `list_students`, `search_students`, `get_teacher_availability`,
+`get_calendar_events`. Same data, two front ends:
+
+```mermaid
+flowchart LR
+    M[mockData.js<br/>in-memory mock records]
+    M -->|fetch at page load| T[Tempo site<br/>admin / teacher / student .html]
+    T --> Browser[Browser<br/>visitor scrolls the dashboard]
+    M -->|same records, via tool call| S[Tempo_MCP_Showcase<br/>5 read-only tools]
+    S --> Claude[Claude<br/>visitor asks a question]
+```
+
+Ask Claude something like *"who's free Tuesday at 4pm?"* and it answers from the same mock
+schedule the dashboards render — no separate backend involved.
+
 ## Roadmap (small, showcase‑friendly)
 - Persist mock data to localStorage with basic CRUD
 - Booking form and validation
