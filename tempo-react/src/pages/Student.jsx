@@ -157,8 +157,8 @@ export default function Student() {
                   <h3>{myTeacher.name}</h3>
                   <p><strong>Instrument:</strong> {myTeacher.instrument}</p>
                   <div className="contact-info">
-                    <p>{myTeacher.email}</p>
-                    <p>{myTeacher.phone}</p>
+                    <p>{myTeacher.email || '—'}</p>
+                    <p>{myTeacher.phone || '—'}</p>
                   </div>
                   <div className="teacher-notes">
                     <h4>Recent Lesson Notes:</h4>

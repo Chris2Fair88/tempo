@@ -48,8 +48,8 @@ export const MOCK_USERS = [
     id: 5,
     email: 'violin.teacher@tempo-music.edu',
     password: 'teacher123',
-    role: 'teacher', 
-    name: 'Viktor Staccato',
+    role: 'teacher',
+    name: 'Priya Nair',
     instrument: 'Violin',
     specialties: ['Classical', 'Contemporary', 'Chamber Music']
   },
@@ -58,7 +58,7 @@ export const MOCK_USERS = [
     email: 'guitar.teacher@tempo-music.edu',
     password: 'teacher123',
     role: 'teacher',
-    name: 'Carlos Allegro',
+    name: 'Daniel Okafor',
     instrument: 'Guitar',
     specialties: ['Classical Guitar', 'Rock', 'Flamenco']
   },
@@ -67,7 +67,7 @@ export const MOCK_USERS = [
     email: 'voice.teacher@tempo-music.edu',
     password: 'teacher123',
     role: 'teacher',
-    name: 'Isabella Soprano',
+    name: 'Hannah Goldberg',
     instrument: 'Voice',
     specialties: ['Opera', 'Musical Theatre', 'Pop Vocal']
   },

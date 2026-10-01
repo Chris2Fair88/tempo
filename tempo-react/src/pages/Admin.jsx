@@ -5,18 +5,19 @@ import UpcomingEvents from '../components/UpcomingEvents';
 
 export default function Admin({ calendarEvents = [] }) {
   const s = store.getState();
-  const [teacherId, setTeacherId] = useState(1);
+  const [teacherId, setTeacherId] = useState(s.teachers[0]?.id ?? '');
   const [day, setDay] = useState('Mon');
   const paymentsThisMonth = useMemo(() => store.listPayments(), []);
   const totalRevenue = paymentsThisMonth.reduce((sum, p) => sum + p.amount, 0);
+  const availability = useMemo(() => store.getAvailabilitySummary(), []);
 
   function timeOff() {
-    store.markTeacherTimeOff(Number(teacherId), day);
+    store.markTeacherTimeOff(teacherId, day);
     toast('Time off applied');
   }
-  
+
   function markAbsent(e) {
-    store.markStudentAbsent(Number(e.target.value));
+    store.markStudentAbsent(e.target.value);
     toast('Student marked absent');
   }
 
@@ -99,7 +100,32 @@ export default function Admin({ calendarEvents = [] }) {
                   <li key={t.id} className="list__item">
                     <strong>{t.name}</strong> — {t.instrument}
                     <div className="contact-info">
-                      {t.email} • {t.phone}
+                      {t.email || 'no email on file'} • {t.phone || 'no phone on file'}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Teacher Availability Card - real data from Tempo MCP Showcase */}
+          <div className="card">
+            <div className="card__header">
+              <h2 className="card__title">🔌 Teacher Availability (live via MCP)</h2>
+            </div>
+            <div className="card__content">
+              <p className="help">
+                Sourced from the Tempo MCP Showcase server's get_teacher_availability
+                tool, {availability.range.start} to {availability.range.end}.
+              </p>
+              <ul className="list">
+                {availability.teachers.map(t => (
+                  <li key={t.teacherId} className="list__item">
+                    <strong>{t.name}</strong>
+                    <div className="contact-info">
+                      {t.lessons} lessons ({Math.round(t.lessonMinutes / 60)}h)
+                      {t.openSlots > 0 ? ` • ${t.openSlots} open slot(s)` : ''}
+                      {t.timeOffBlocks > 0 ? ` • ${t.timeOffBlocks} time-off block(s)` : ''}
                     </div>
                   </li>
                 ))}

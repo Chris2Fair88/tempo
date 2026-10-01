@@ -68,7 +68,7 @@ const RegisterModal = ({ isOpen, onClose, onRegister, onSwitchToLogin }) => {
       role: formData.role,
       email: formData.email,
       ...(formData.role === 'teacher' && { instrument: formData.instrument }),
-      ...(formData.role === 'student' && { teacherId: parseInt(formData.teacherId) })
+      ...(formData.role === 'student' && { teacherId: formData.teacherId })
     }
     
     onRegister(registrationData)
