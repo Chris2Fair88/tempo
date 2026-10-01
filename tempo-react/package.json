@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Chris2Fair88.github.io/tempo/tempo-react",
+  "homepage": "https://chris2fair88.github.io/tempo/",
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
