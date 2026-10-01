@@ -61,6 +61,22 @@ Parent → Child account oversight, communication, payments
 - **Responsive UI** - Optimized for desktop, tablet, and mobile
 - **Error Handling** - Comprehensive user feedback system
 
+## 🤖 AI Integration (MCP)
+
+Tempo has a companion MCP server, `Tempo_MCP_Showcase`, deployed separately as a Cloudflare Worker. It lets Claude answer questions about the schedule through five read-only tools. The dashboards and the MCP server use two separate copies of the same sample data, as shown below.
+
+```mermaid
+flowchart LR
+    W["Tempo_MCP_Showcase worker<br/>embedded fictional dataset"]
+    W --> T["5 read-only MCP tools<br/>list_teachers, list_students,<br/>search_students,<br/>get_teacher_availability,<br/>get_calendar_events"]
+    T --> C["Claude<br/>visitor asks a question"]
+    W -.->|one-time export| S["mcpSnapshot.js<br/>checked-in snapshot"]
+    S --> D["Tempo dashboards<br/>admin / teacher / student"]
+    D --> B["Browser<br/>visitor scrolls the dashboard"]
+```
+
+The Worker runs only on embedded fictional data and makes no calls to any external data source. The dashboards read a checked-in snapshot of the Worker's responses, not a live connection to the Worker. See `tempo-react/README.md` for how the snapshot was taken and how to refresh it.
+
 ## 📁 Project Structure
 
 ```
