@@ -108,15 +108,15 @@ export default function Admin({ calendarEvents = [] }) {
             </div>
           </div>
 
-          {/* Teacher Availability Card - real data from Tempo MCP Showcase */}
+          {/* Teacher Availability Card - checked-in snapshot of Tempo MCP Showcase responses */}
           <div className="card">
             <div className="card__header">
-              <h2 className="card__title">🔌 Teacher Availability (live via MCP)</h2>
+              <h2 className="card__title">🔌 Teacher Availability (MCP snapshot)</h2>
             </div>
             <div className="card__content">
               <p className="help">
-                Sourced from the Tempo MCP Showcase server's get_teacher_availability
-                tool, {availability.range.start} to {availability.range.end}.
+                Snapshot of the Tempo MCP Showcase server's get_teacher_availability
+                results, {availability.range.start} to {availability.range.end}.
               </p>
               <ul className="list">
                 {availability.teachers.map(t => (

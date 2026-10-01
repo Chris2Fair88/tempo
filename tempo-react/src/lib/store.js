@@ -168,7 +168,7 @@ export const store = {
   // Admin features
   listTeachers() { return load().teachers; },
   listStudents() { return load().students; },
-  // Real, live-sourced (via snapshot) per-teacher weekly load — see
+  // Snapshot of the MCP server's per-teacher weekly load (not live) — see
   // src/data/mcpSnapshot.js. Not derived from the mock store's own state.
   getAvailabilitySummary() { return rawAvailability; },
   listPayments(month = new Date().toISOString().slice(0,7)) {
